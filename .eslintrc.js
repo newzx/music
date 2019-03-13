@@ -30,6 +30,8 @@ module.exports = {
     // 禁止混用tab和空格
     'eol-last':[0],
     // 函数定义时括号前要不要有空格
-    'space-before-function-paren': [0]
+    'space-before-function-paren': [0],
+    // 空行最多不能超过5行
+    'no-multiple-empty-lines': [1, {"max": 5}]
   }
 }
