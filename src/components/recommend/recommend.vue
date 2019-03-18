@@ -1,26 +1,44 @@
 <template>
-  <div class="">
-    推荐
-    </div>
+  <div class="recommend" ref="recommend">
+    <div class="recommend-content">
+      <div v-if="recommends.length" class="slider-wrapper" ref="sliderWrapper">
+        <slider>
+          <div v-for="item in recommends" key="index">
+            <a :href="item.linkUrl">
+              <img :src="item.picUrl">
+            </a>
+          </div>
+        </slider>
+      </div>
+    </div>  
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
+import Slider from 'base/slider/slider'
 import {getRecommend} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 
 export default {
+  data() {
+    return {
+      recommends: []
+    }
+  },
   created() {
     this._getRecommend()
   },
   methods: {
     _getRecommend() {
       getRecommend().then((res) => {
-          console.log(res)
         if (res.code === ERR_OK) {
-          console.log(res.data.slider)
-        }       
+          this.recommends = res.data.slider
+        }
       })
     }
+  },
+  components: {
+    Slider
   }
 }
 </script>
