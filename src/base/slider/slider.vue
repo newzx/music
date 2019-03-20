@@ -3,6 +3,9 @@
     <div class="slider-group" ref="sliderGroup">
       <slot></slot>
     </div>
+    <div class="dots">
+      <span class="dot" :class="{active: currentPageIndex === index}" v-for="(item, index) in dots" :key="index"></span>
+    </div>
   </div>
 </template>
 
@@ -26,14 +29,43 @@ export default {
       default: 4000
     }
   },
+  data() {
+    return {
+      dots: [],
+      currentPageIndex: 0
+    }
+  },
   mounted() {
     setTimeout(() => {
       this._setSliderWidth()
+      this._initDots()
       this._initSlider()
+      if (this.autoPlay) {
+        this._play()
+      }
     }, 20)
+
+    window.addEventListener('resize', () => {
+      if (!this.slider) {
+        return
+      }
+      this._setSliderWidth(true)
+      this.slider.refresh()
+    })
+  },
+  activated() {
+    if (this.autoPlay) {
+      this._play()
+    }
+  },
+  deactivated() {
+    clearTimeout(this.timer)
+  },
+  beforeDestroy() {
+    clearTimeout(this.timer)
   },
   methods: {
-    _setSliderWidth() {
+    _setSliderWidth(isResize) {
       this.children = this.$refs.sliderGroup.children
       let width = 0
       let sliderWidth = this.$refs.slider.clientWidth
@@ -43,7 +75,7 @@ export default {
         child.style.width = sliderWidth + 'px'
         width += sliderWidth
       }
-      if (this.loop) {
+      if (this.loop && !isResize) {
         width += sliderWidth * 2 // 无缝滚动需要在头尾各clone 一个节点
       }
       this.$refs.sliderGroup.style.width = width + 'px'
@@ -52,15 +84,41 @@ export default {
       this.slider = new BScroll(this.$refs.slider, {
         scrollX: true,
         scrollY: false,
-        momentum: false,// 惯性
-        snap: true,
-        snapLoop: this.loop,
-        snapThreshold: 0.3,
-        spapSpeed: 400
-        // click: true  超链接不能点击问题fastclick
+        momentum: false, // 惯性
+        snap: {
+          loop: this.loop,
+          threshold: 0.3,
+          speed: 400
+        },
+        click: true
       })
+      this.slider.on('scrollEnd', () => {
+        let pageIndex = this.slider.getCurrentPage().pageX
+        // if (this.loop) {
+        //   pageIndex -= 1
+        // }
+        this.currentPageIndex = pageIndex
+        if (this.autoPlay) {
+          clearTimeout(this.timer)
+          this._play()
+        }
+      })
+    },
+    _initDots() {
+      this.dots = new Array(this.children.length)
+    },
+    _play() {
+      // let pageIndex = this.currentPageIndex + 1
+      // if (this.loop) {
+      //   pageIndex += 1
+      // }
+      this.timer = setTimeout(() => {
+        // this.slider.goToPage(pageIndex, 0, 400)
+        this.slider.next()
+      }, this.interval);
     }
   }
+
 }
 </script>
 
