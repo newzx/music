@@ -15,7 +15,7 @@ const express = require('express')
 const axios = require('axios')
 const app = express()
 const apiRoutes = express.Router()
-// 当请求路径为/api下的时候  就热给apiRoutes处理
+// 当请求路径为/api下的时候  就扔给apiRoutes处理
 app.use('/api', apiRoutes)
 
 const HOST = process.env.HOST

@@ -18,16 +18,16 @@ export function getDiscList() {
     platform: 'yqq',
     hostUin: 0,
     sin: 0,
-    ein: 29,
+    ein: 29, // 获取的数据条数
     sortId: 5,
     needNewCode: 0,
     categoryId: 10000000,
     rnd: Math.random(),
-    format: 'json'
+    format: 'json' // json格式的数据
   })
   return axios.get(url, {
     params: data
   }).then((res) => {
-    return Promise.resolve(res.data)
+    return Promise.resolve(res.data) // 一定得通过return使数据能够被拿到
   })
 }
