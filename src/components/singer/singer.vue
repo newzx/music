@@ -23,8 +23,8 @@ export default {
     _getSingerList() {
       getSingerList().then((res) => {
         if (res.code === ERR_OK) {
-          this.singers = res.data.list
-          console.log(this._normalizeSinger(this.singers))
+          this.singers = this._normalizeSinger(res.data.list)
+          console.log(this.singers)
         }
       })
     },
@@ -66,9 +66,9 @@ export default {
         }
       }
       ret.sort((a, b) => {
-        return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+        return a.title.charCodeAt(0) - b.title.charCodeAt(0) // 升序排列
       })
-      return hot.concat(ret)
+      return hot.concat(ret) // 返回链接的对象
     }
   }
 }
