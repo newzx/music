@@ -1,5 +1,10 @@
 <template>
-  <scroll class="listview" :data="data" ref="listview">
+  <scroll class="listview"
+          :data="data"
+          ref="listview"
+          :listenScroll="listenScroll"
+          :probeType="this.probeType"
+          @scroll="scroll">
     <ul>
       <li class="list-group" v-for="(group, index) in data" :key="index" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
@@ -13,7 +18,10 @@
     </ul>
     <div class="list-shortcut" @touchstart.stop.prevent="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove">
       <ul>
-        <li class="item" v-for="(item, index) in shortCutList" :key="index" :data-index="index">{{item}}</li>
+        <li class="item" v-for="(item, index) in shortCutList"
+          :key="index"
+          :data-index="index"
+          :class="{'current': currentIndex === index}">{{item}}</li>
       </ul>
     </div>
   </scroll>
@@ -26,11 +34,20 @@ const ANCHOR_HEIGHT = 18
 export default {
   created() {
     this.touch = {} // 只是为了两个函数获取到对方的数据 所以不用data
+    this.listenScroll = true
+    this.listHeight = []
+    this.probeType = 3
   },
   props: {
     data: {
       type: Array,
       default: () => []
+    }
+  },
+  data() {
+    return {
+      scrollY: -1,
+      currentIndex: 0
     }
   },
   computed: {
@@ -55,8 +72,42 @@ export default {
       let anchorIndex = parseInt(this.touch.anchorIndex) + delta
       this._scrollTo(anchorIndex)
     },
+    scroll(pos) {
+      this.scrollY = pos.y
+    },
     _scrollTo(index) {
-      this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
+      this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // 0 规定动画的时间
+    },
+    _calculateHeight() {
+      this.listHeight = []
+      const list = this.$refs.listGroup
+      let height = 0
+      this.listHeight.push(height)
+      for (let i = 0; i < list.length; i++) {
+        let item = list[i]
+        height += item.clientHeight
+        this.listHeight.push(height)
+      }
+    }
+  },
+  watch: {
+    data() {
+      setTimeout(() => {
+        this._calculateHeight()
+      }, 20)
+    },
+    scrollY(newY) {
+      const listHeight = this.listHeight
+      for (let i = 0; i < listHeight.length; i++) {
+        let height1 = listHeight[i]
+        let height2 = listHeight[i + 1]
+        if (!height2 || (-newY > height1 && -newY < height2)) {
+          this.currentIndex = i
+          console.log(this.currentIndex)
+          return
+        }
+      }
+      this.currentIndex = 0
     }
   },
   components: {
